@@ -26,6 +26,7 @@
                 <span class="brand-text">LinkVault</span>
             </div>
             <div class="nav-actions">
+                <button id="settings-btn" class="btn-icon" title="Settings">⚙️</button>
                 <button id="theme-toggle" class="btn-icon" title="Toggle Theme">
                     <span class="icon-light">☀️</span>
                     <span class="icon-dark">🌙</span>
@@ -40,8 +41,75 @@
 
     <!-- Main Content -->
     <main class="main-content">
+        
+        <!-- Setup Section (shown when API not configured) -->
+        <section id="setup-section" class="setup-section hidden">
+            <div class="setup-container">
+                <div class="setup-icon">🔧</div>
+                <h1>Welcome to LinkVault!</h1>
+                <p>Before you begin, you need to set up the backend API.</p>
+                
+                <div class="setup-steps">
+                    <div class="setup-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Create Google Sheet</h3>
+                            <p>Go to <a href="https://sheets.google.com" target="_blank">Google Sheets</a> and create a new spreadsheet. Copy the Spreadsheet ID from the URL.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="setup-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Create Apps Script</h3>
+                            <p>Go to <a href="https://script.google.com" target="_blank">Google Apps Script</a>, create a new project, paste the backend code, and add your Spreadsheet ID.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="setup-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Deploy Web App</h3>
+                            <p>Deploy the script as a Web App (Execute as: Me, Access: Anyone) and copy the URL.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="setup-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3>Enter API URL Below</h3>
+                            <p>Paste your Web App URL in the field below to connect the app.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="setup-form" class="setup-form">
+                    <div class="form-group">
+                        <label for="api-url-input">Google Apps Script Web App URL</label>
+                        <input 
+                            type="url" 
+                            id="api-url-input" 
+                            placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"
+                            required
+                        >
+                        <small class="form-hint">Example: https://script.google.com/macros/s/AKfycb.../exec</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        Save & Connect
+                    </button>
+                </form>
+                
+                <div class="setup-demo">
+                    <p>Want to try without setup?</p>
+                    <button id="demo-mode-btn" class="btn btn-outline">
+                        🎮 Use Demo Mode
+                    </button>
+                </div>
+            </div>
+        </section>
+
         <!-- Auth Section -->
-        <section id="auth-section" class="auth-section">
+        <section id="auth-section" class="auth-section hidden">
             <div class="auth-container">
                 <div class="auth-header">
                     <h1>Welcome to LinkVault</h1>
@@ -140,6 +208,12 @@
 
         <!-- Dashboard Section -->
         <section id="dashboard-section" class="dashboard-section hidden">
+            <!-- Demo Mode Banner -->
+            <div id="demo-banner" class="demo-banner hidden">
+                <span>🎮 Demo Mode - Data is stored locally only</span>
+                <button id="exit-demo" class="btn btn-sm btn-outline">Setup Real Backend</button>
+            </div>
+            
             <!-- Dashboard Header -->
             <div class="dashboard-header">
                 <div class="header-content">
@@ -164,18 +238,21 @@
                 </div>
                 <div class="filter-options">
                     <div class="tags-filter">
-                        <label for="tag-filter">Filter by tag:</label>
+                        <label for="tag-filter">Filter:</label>
                         <select id="tag-filter">
                             <option value="">All Tags</option>
                         </select>
                     </div>
+                    <div class="sort-options">
+                        <select id="sort-select">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="title">Title A-Z</option>
+                        </select>
+                    </div>
                     <div class="view-toggle">
-                        <button id="grid-view" class="view-btn active" title="Grid View">
-                            <span>▦</span>
-                        </button>
-                        <button id="list-view" class="view-btn" title="List View">
-                            <span>☰</span>
-                        </button>
+                        <button id="grid-view" class="view-btn active" title="Grid View">▦</button>
+                        <button id="list-view" class="view-btn" title="List View">☰</button>
                     </div>
                 </div>
             </div>
@@ -221,21 +298,24 @@
                         required 
                         placeholder="https://example.com"
                     >
+                    <small class="form-hint">Enter a valid URL starting with http:// or https://</small>
                 </div>
                 
                 <div class="form-group">
                     <label for="link-title">Title *</label>
-                    <input 
-                        type="text" 
-                        id="link-title" 
-                        name="title" 
-                        required 
-                        placeholder="My Awesome Link"
-                        maxlength="200"
-                    >
-                    <button type="button" id="fetch-title" class="btn btn-sm btn-outline">
-                        Auto-fetch Title
-                    </button>
+                    <div class="title-input-group">
+                        <input 
+                            type="text" 
+                            id="link-title" 
+                            name="title" 
+                            required 
+                            placeholder="My Awesome Link"
+                            maxlength="200"
+                        >
+                        <button type="button" id="fetch-title" class="btn btn-sm btn-outline" title="Auto-detect title">
+                            🔄
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -244,7 +324,7 @@
                         type="text" 
                         id="link-tags" 
                         name="tags" 
-                        placeholder="work, tutorial, reference (comma-separated)"
+                        placeholder="work, tutorial, reference"
                     >
                     <small class="form-hint">Separate tags with commas</small>
                 </div>
@@ -277,7 +357,7 @@
                 <button class="btn-close close-delete-modal">✕</button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete this link? This action cannot be undone.</p>
+                <p>Are you sure you want to delete this link?</p>
                 <p class="delete-link-title"></p>
             </div>
             <div class="modal-actions">
@@ -287,9 +367,46 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Settings</h2>
+                <button class="btn-close close-settings-modal">���</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="settings-api-url">API URL</label>
+                    <input 
+                        type="url" 
+                        id="settings-api-url" 
+                        placeholder="https://script.google.com/macros/s/.../exec"
+                    >
+                    <small class="form-hint">Your Google Apps Script Web App URL</small>
+                </div>
+                
+                <div class="settings-info">
+                    <h4>Current Mode:</h4>
+                    <p id="current-mode">Not configured</p>
+                </div>
+                
+                <div class="settings-actions">
+                    <button id="clear-data-btn" class="btn btn-outline btn-danger-outline">
+                        🗑️ Clear All Local Data
+                    </button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline close-settings-modal">Cancel</button>
+                <button id="save-settings" class="btn btn-primary">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer">
-        <p>LinkVault © <span id="current-year"></span> | Your Personal Bookmark Manager</p>
+        <p>LinkVault © <span id="current-year"></span> | Personal Bookmark Manager</p>
     </footer>
 
     <script src="script.js"></script>

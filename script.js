@@ -3,7 +3,7 @@
 // ============================================
 const CONFIG = {
     // Replace with your deployed Google Apps Script Web App URL
-    API_BASE_URL: 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL',
+    API_BASE_URL: 'https://script.google.com/macros/s/AKfycbwHHmMizRS-Jvi2z6v6Vmz5Dyt0uOPZymCI2XdwnhAWcUn_SmbCNrlfs7JMC6qek16u/exec',
     
     // Token expiry time (24 hours in milliseconds)
     TOKEN_EXPIRY: 24 * 60 * 60 * 1000,

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Personal Link Manager - Save, organize, and manage your bookmarks">
+    <meta name="theme-color" content="#6366f1">
+    <title>LinkVault - Personal Link Manager</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔗</text></svg>">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">🔗</span>
+                <span class="brand-text">LinkVault</span>
+            </div>
+            <div class="nav-actions">
+                <button id="theme-toggle" class="btn-icon" title="Toggle Theme">
+                    <span class="icon-light">☀️</span>
+                    <span class="icon-dark">🌙</span>
+                </button>
+                <div id="user-menu" class="user-menu hidden">
+                    <span id="user-email" class="user-email"></span>
+                    <button id="logout-btn" class="btn btn-outline btn-sm">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Auth Section -->
+        <section id="auth-section" class="auth-section">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <h1>Welcome to LinkVault</h1>
+                    <p>Your personal bookmark manager</p>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form">
+                    <h2>Login</h2>
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input 
+                            type="email" 
+                            id="login-email" 
+                            name="email" 
+                            required 
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <div class="password-input">
+                            <input 
+                                type="password" 
+                                id="login-password" 
+                                name="password" 
+                                required 
+                                placeholder="••••••••"
+                                autocomplete="current-password"
+                                minlength="6"
+                            >
+                            <button type="button" class="toggle-password" tabindex="-1">👁️</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Login</button>
+                    <p class="auth-switch">
+                        Don't have an account? 
+                        <a href="#" id="show-register">Register</a>
+                    </p>
+                </form>
+
+                <!-- Register Form -->
+                <form id="register-form" class="auth-form hidden">
+                    <h2>Create Account</h2>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input 
+                            type="email" 
+                            id="register-email" 
+                            name="email" 
+                            required 
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <div class="password-input">
+                            <input 
+                                type="password" 
+                                id="register-password" 
+                                name="password" 
+                                required 
+                                placeholder="••••••••"
+                                autocomplete="new-password"
+                                minlength="6"
+                            >
+                            <button type="button" class="toggle-password" tabindex="-1">👁️</button>
+                        </div>
+                        <small class="form-hint">Minimum 6 characters</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm">Confirm Password</label>
+                        <div class="password-input">
+                            <input 
+                                type="password" 
+                                id="register-confirm" 
+                                name="confirm" 
+                                required 
+                                placeholder="••••••••"
+                                autocomplete="new-password"
+                                minlength="6"
+                            >
+                            <button type="button" class="toggle-password" tabindex="-1">👁️</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+                    <p class="auth-switch">
+                        Already have an account? 
+                        <a href="#" id="show-login">Login</a>
+                    </p>
+                </form>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="dashboard-section hidden">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="header-content">
+                    <h1>My Links</h1>
+                    <p id="links-count">0 links saved</p>
+                </div>
+                <button id="add-link-btn" class="btn btn-primary">
+                    <span>+</span> Add Link
+                </button>
+            </div>
+
+            <!-- Search & Filter Bar -->
+            <div class="search-filter-bar">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="Search links by title, URL, or notes..."
+                    >
+                    <button id="clear-search" class="clear-search hidden">✕</button>
+                </div>
+                <div class="filter-options">
+                    <div class="tags-filter">
+                        <label for="tag-filter">Filter by tag:</label>
+                        <select id="tag-filter">
+                            <option value="">All Tags</option>
+                        </select>
+                    </div>
+                    <div class="view-toggle">
+                        <button id="grid-view" class="view-btn active" title="Grid View">
+                            <span>▦</span>
+                        </button>
+                        <button id="list-view" class="view-btn" title="List View">
+                            <span>☰</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Links Container -->
+            <div id="links-container" class="links-container grid-view">
+                <!-- Links will be dynamically inserted here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-state hidden">
+                <div class="empty-icon">📚</div>
+                <h3>No links yet</h3>
+                <p>Start saving your favorite links by clicking the "Add Link" button above.</p>
+            </div>
+
+            <!-- No Results State -->
+            <div id="no-results" class="empty-state hidden">
+                <div class="empty-icon">🔍</div>
+                <h3>No results found</h3>
+                <p>Try adjusting your search or filter criteria.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add/Edit Link Modal -->
+    <div id="link-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Add New Link</h2>
+                <button id="close-modal" class="btn-close">✕</button>
+            </div>
+            <form id="link-form" class="link-form">
+                <input type="hidden" id="link-id" name="link_id">
+                
+                <div class="form-group">
+                    <label for="link-url">URL *</label>
+                    <input 
+                        type="url" 
+                        id="link-url" 
+                        name="url" 
+                        required 
+                        placeholder="https://example.com"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="link-title">Title *</label>
+                    <input 
+                        type="text" 
+                        id="link-title" 
+                        name="title" 
+                        required 
+                        placeholder="My Awesome Link"
+                        maxlength="200"
+                    >
+                    <button type="button" id="fetch-title" class="btn btn-sm btn-outline">
+                        Auto-fetch Title
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="link-tags">Tags</label>
+                    <input 
+                        type="text" 
+                        id="link-tags" 
+                        name="tags" 
+                        placeholder="work, tutorial, reference (comma-separated)"
+                    >
+                    <small class="form-hint">Separate tags with commas</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="link-notes">Notes</label>
+                    <textarea 
+                        id="link-notes" 
+                        name="notes" 
+                        rows="3" 
+                        placeholder="Add any notes about this link..."
+                        maxlength="500"
+                    ></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" id="cancel-modal" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Link</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Delete Link</h2>
+                <button class="btn-close close-delete-modal">✕</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this link? This action cannot be undone.</p>
+                <p class="delete-link-title"></p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline close-delete-modal">Cancel</button>
+                <button id="confirm-delete" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>LinkVault © <span id="current-year"></span> | Your Personal Bookmark Manager</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
